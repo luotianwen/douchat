@@ -1,0 +1,53 @@
+<extend name="Public/base" />
+<block name="style">
+  <link rel="stylesheet" type="text/css" href="__CSS__/shop.css" media="all">
+</block>
+<block name="body">
+  <div class="wrap">
+  	<ul class="tab-nav nav">
+  		<li class="current" data-type="upgrade_online">
+  			<a href="javascript:void(0);">插件
+  			</a>
+  		</li>
+  		<li data-type="fversion">
+  			<a href="javascript:void(0);">微站模板
+  			</a>
+  		</li>
+  		<li data-type="fversion">
+  			<a href="javascript:void(0);">后台模板
+  			</a>
+  		</li>
+  	</ul>
+
+    <section id="contents" class="tab-content">
+      <div class="main_apps">
+        <ul></ul>
+      </div>
+    </section>
+  </div>
+	</div>
+	<script type="text/javascript" src="__JS__/yunservice_api.js"></script>
+	<script>
+	function show_shop(data) {
+		$.each(data, function(i, item) {
+			console.log(item);
+			var ul = $('.main_apps ul');
+			var li = '<li><div class="app_wrap">'+
+                  '<div class="img">'+
+                    '<a href="http://douchat.cc/?/shop/'+item.id+'"><img src="'+item.cover+'"></a>'+
+                  '</div>'+
+                  '<div class="desc">'+
+                          '<p class="name">'+item.name+'</p>'+
+                          '<p class="intro">'+item.title+'</p>'+
+                          '<a class="use_btn" href="http://douchat.cc/?/shop/'+item.id+'" target="_blank">详情</a>'+
+                          '<i class="access"></i>'+
+                    '</div>'+
+                '</div></li>';
+			ul.append(li);
+		});
+	}
+	var params = {uid:2330,key:'esdasdadas'};
+	
+	get_api_data('shop','show_shop', params);
+	</script>
+</block>

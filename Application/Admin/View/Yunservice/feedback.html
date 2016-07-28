@@ -1,0 +1,41 @@
+<extend name="Public/base" />
+<block name="body">
+	<div class="wrap">
+		<ul class="tab-nav nav">
+			<li class="current" data-type="feedback">
+				<a href="javascript:void(0);">BUG反馈
+				</a>
+			</li>
+		</ul>
+		<div id="feedback" class="tab-content">
+			<div class="data-table table-striped">
+				<table>
+					<thead>
+						<tr>
+							<th class="">名称</th>
+							<th class="">状态</th>
+							<th class="">时间</th>
+						</tr>
+					</thead>
+					<tbody>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript" src="__JS__/yunservice_api.js"></script>
+	<script>
+	function show_feedback(data) {
+		console.log(data);
+		$.each(data, function(i, item) {
+			var tr = $('<tr></tr>');
+			tr.append('<td><a target=_blank href="'+get_api_url()+'?/feedback/'+item.id+'">'+'【'+item.category_id+'BUG】'+item.title+'</a></td>');
+			var array = new Array('未处理','处理中','已处理');
+			tr.append('<td>'+array[item.status]+'</td>');
+			tr.append('<td>'+item.add_time+'</td>');
+			$('table tbody').append(tr);
+		});
+	}
+	get_api_data('feedback','show_feedback');
+	</script>
+</block>

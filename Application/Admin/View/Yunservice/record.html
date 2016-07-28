@@ -1,0 +1,63 @@
+<extend name="Public/base" />
+<block name="body">
+<style type="text/css">
+
+</style>
+
+		<!-- 数据列表 -->
+		<div class="wrap">
+	<ul class="tab-nav nav">
+		<li class="current" data-type="addons">
+			<a href="javascript:void(0);">插件
+			</a>
+		</li>
+		<li data-type="fversion">
+			<a href="javascript:void(0);">微站模板
+			</a>
+		</li>
+		<li data-type="fversion">
+			<a href="javascript:void(0);">后台模板
+			</a>
+		</li>
+	</ul>
+
+    <section id="addons" class="tab-content">
+      <div class="data-table table-striped">
+        <table>
+          <thead>
+            <tr>
+              <th class="">插件名称</th>
+              <th class="">分支名称</th>
+              <th class="">购买价格</th>
+              <th class="">购买时间</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+	</div>
+	<script type="text/javascript" src="__JS__/yunservice_api.js"></script>
+	<script>
+	function show_buyed_records(data) {
+		if (data.errcode != 1111) {
+			alert(data.errmsg);
+			window.location.href = "{:U('siteinfo')}";
+		}
+		$.each(data.data, function(i, item) {
+			var tr = $('<tr></tr>');
+      tr.append('<td><a target=_blank href="'+get_api_url()+'?/shop/'+item.shop_id+'">'+item.shop_info.name+'</a></td>');
+      tr.append('<td>'+item.branch_info.name+'</td>');
+      tr.append('<td>'+item.price+'</td>');
+      tr.append('<td>'+item.time+'</td>');
+      $('#addons table tbody').append(tr);
+			
+		});
+	}
+	var params = {uid:"{$site_info.admin_uid}",site_url:"{$site_info.site_url}",site_token:"{$site_info.site_token}"};
+	
+	get_api_data('buyed_records','show_buyed_records', params);
+	</script>
+</block>

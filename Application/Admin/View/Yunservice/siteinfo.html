@@ -1,0 +1,174 @@
+<extend name="Public/base" />
+
+<block name="body">
+	<style type="text/css">
+		.show{
+			display: block;
+		}
+		.hide{
+			display: none;
+		}
+	</style>
+	<div class="wrap">
+		<ul class="tab-nav nav">
+			<li class="current" data-type="siteinfo">
+				<a href="javascript:void(0);" class="title"><if condition="$is_site_bind eq 1">已绑定站点<else />绑定站点</if>
+				</a>
+			</li>
+		</ul>
+		<div id="siteinfo" class="tab-content">
+			<form method="post" class="form-horizontal">
+				<div class="form-item">
+					<label class="item-label">站点名称<small id="rebind" style="padding:10px;color:#08a5e0;cursor:pointer">重新绑定</small></label>
+					<div class="controls">
+						<input class="text input-large" name="site_name" value="{$site_info.site_name}" type="text">
+					</div>
+				</div>
+				<div class="form-item">
+					<label class="item-label">站点URL<small>（系统自动获取，不可手动填写）</small></label>
+					<div class="controls">
+						<input class="text input-large" name="site_url" value="{$site_url}" type="text" readonly="true" />
+					</div>
+				</div>
+				<div class="form-item">
+					<label class="item-label">站点IP<small>（如果系统不能自动获取，请手动填写）</small></label>
+					<div class="controls">
+						<input class="text input-large" name="site_ip" value="{$site_ip}" type="text" />
+					</div>
+				</div>
+				
+				<div class="already_bind <if condition="$is_site_bind eq 1">show<else />hide</if>">
+				<div class="form-item">
+					<label class="item-label">绑定账户<small></small></label>
+					<div class="controls">
+						<input class="text input-large" name="admin_uid" value="{$site_info.admin_uid}" type="text" readonly="true" />
+					</div>
+				</div>
+				<div class="form-item">
+					<label class="item-label">绑定时间<small></small></label>
+					<div class="controls">
+						<input class="text input-large" name="add_time" value="{$site_info.add_time|time_format}" type="text" readonly="true" />
+					</div>
+				</div>
+				</div>
+		
+				<div class="not_bind <if condition="$is_site_bind eq 0">show<else />hide</if>">
+				<div class="form-item">
+					<label class="item-label">用户名<small>（豆信社区的登录用户名）</small></label>
+					<div class="controls">
+						<input class="text input-large" name="username" value="" type="text">
+					</div>
+				</div>
+				<div class="form-item">
+					<label class="item-label">密码<small>（豆信社区的登录密码）</small></label>
+					<div class="controls">
+						<input class="text input-large" name="password" value="" type="password">
+					</div>
+				</div>
+				<div id="msg" style="padding:10px;color:red"></div>
+				<div class="form-item">
+					<button class="btn submit-btn ajax-post" id="submit" type="button" target-form="form-horizontal">确 定</button>
+				</div>
+				</div>
+			
+			</form>
+		</div>
+	</div>
+	<script type="text/javascript" src="__JS__/yunservice_api.js"></script>
+	<script>
+	$("#rebind").click(function() {
+		$(".already_bind").css("display", "none");
+		$(".not_bind").css("display", "block");
+		$(".title").html("绑定站点");
+	});
+
+	$('.tab-nav').on('click', 'li', function() {
+		_this = $(this);
+		$('.tab-content').hide();
+		$('#'+_this.data('type')).removeClass('hidden');
+		$('#'+_this.data('type')).show();
+		_this.addClass('current');
+		_this.siblings().removeClass('current');
+	});
+
+	$('#submit').on('click', function() {
+		var username = $('input[name=username]');
+		var password = $('input[name=password]');
+		var site_name = $('input[name=site_name]');
+		var site_url = $('input[name=site_url]');
+		var site_ip = $('input[name=site_ip]');
+		var msg = $("#msg");
+		var params = {
+			user_name : username.val(),
+			password : password.val(),
+			site_name : site_name.val(),
+			site_url : site_url.val(),
+			site_ip : site_ip.val(),
+		};
+
+		if (!site_name.val()) {
+			msg.html("请填写站点名称");
+			site_name.focus();
+			return false;
+		}
+
+		if (!site_url.val()) {
+			msg.html("未能获取站点URL");
+			site_url.focus();
+			return false;
+		}
+
+		if (!site_ip.val()) {
+			msg.html("未能获取站点IP");
+			site_ip.focus();
+			return false;
+		}
+
+		if (!username.val()) {
+			msg.html("请填写豆信社区的登录用户名");
+			username.focus();
+			return false;
+		}
+
+		if (!password.val()) {
+			msg.html("请填写豆信社区的登录密码");
+			password.focus();
+			return false;
+		}
+
+		get_api_data('check_login', 'check_login', params);
+		return false;
+	});
+
+
+	function check_login(data) {
+		if (data.errcode == 1111) {
+			$("#msg").html("绑定成功，正在保存站点信息...");
+			$.ajax({
+				url : "{:U('siteinfo')}",
+				type : "post",
+				dataType : "json",
+				data : {
+					admin_uid : data.site_info.uid,
+					site_name : data.site_info.site_name,
+					site_token : data.site_info.site_token,
+					add_time : data.site_info.add_time
+				},
+				success : function(data) {
+					if (data.errcode == 1) {
+						window.location.href = "{:U('siteinfo')}";
+					} else {
+						$("#msg").html(data.errmsg);
+					}					
+				},
+				error : function() {
+					$("#msg").html("保存站点信息失败，请重新绑定站点");
+				}
+			})
+		} else {
+			$("#msg").html(data.errmsg);
+		}	
+	}
+
+	</script>
+</block>

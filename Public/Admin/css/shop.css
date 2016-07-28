@@ -1,0 +1,45 @@
+.main_apps ul{ overflow:hidden; zoom:1; background:#fff;}
+.main_apps li{ 
+	float: left;
+	width: 25%;
+	margin: 0;
+	height: auto;
+	overflow: hidden;
+	border: 0px solid #e7e7eb;
+	position: relative;
+}
+.main_apps li .app_wrap{
+	margin: 10px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	height: 120px;
+}
+.main_apps li .use_btn{
+	position: absolute;
+	right: 30px;
+	top: 50px;
+	line-height: 20px;
+	color: red;
+}
+
+.main_apps li .detail{
+	top: 75px;
+	color: #08a5e0;
+}
+
+.main_apps li .access {
+	background: ;
+	width: 16px;
+	height: 16px;
+	vertical-align: middle;
+	display: inline-block;
+	position: absolute;
+	right: 10px;
+	top: 43px;
+}
+
+.main_apps li .img{float:left; width:100px; text-align:center}
+.main_apps li img{ border-radius:0px; width:100px; height:100px; margin:8px;}
+.main_apps li .desc{ padding: 8px 70px 10px 110px;margin:8px;}
+.main_apps li .name{ font-size:15px; font-weight:bold;}
+.main_apps li .intro{ font-size:14px; color:#888;height: 65px;overflow: hidden;}

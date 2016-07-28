@@ -1,0 +1,74 @@
+<extend name="Public/base" />
+<block name="body">
+	<div class="wrap">
+		<ul class="tab-nav nav">
+			<li class="current" data-type="question">
+				<a href="javascript:void(0);">开发问答
+				</a>
+			</li>
+			<li data-type="article">
+				<a href="javascript:void(0);">技术分享
+				</a>
+			</li>
+		</ul>
+		<div id="question" class="tab-content">
+			<div class="data-table table-striped">
+				<table>
+					<thead>
+						<tr>
+							<th class="">标题</th>
+							<th class="">时间</th>
+						</tr>
+					</thead>
+					<tbody>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div id="article" class="tab-content hidden">
+			<div class="data-table table-striped">
+				<table>
+					<thead>
+						<tr>
+							<th class="">标题</th>
+							<th class="">时间</th>
+						</tr>
+					</thead>
+					<tbody>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript" src="__JS__/yunservice_api.js"></script>
+	<script>
+	function show_question(data) {
+		$.each(data, function(i, item) {
+			console.log(item);
+			var tr = $('<tr></tr>');
+			tr.append('<td><a target=_blank href="'+get_api_url()+'?/question/'+item.id+'">'+item.question_content+'</a></td>');
+			tr.append('<td>'+item.add_time+'</td>');
+			$('#question table tbody').append(tr);
+		});
+	}
+	get_api_data('question','show_question');
+
+	function show_article(data) {
+		$.each(data, function(i, item) {
+			var tr = $('<tr></tr>');
+			tr.append('<td><a target=_blank href="'+get_api_url()+'?/article/'+item.id+'">'+item.title+'</a></td>');
+			tr.append('<td>'+item.add_time+'</td>');
+			$('#article table tbody').append(tr);
+		});
+	}
+	get_api_data('article','show_article');
+	$('.tab-nav').on('click', 'li', function() {
+		_this = $(this);
+		$('.tab-content').hide();
+		$('#'+_this.data('type')).removeClass('hidden');
+		$('#'+_this.data('type')).show();
+		_this.addClass('current');
+		_this.siblings().removeClass('current');
+	});
+	</script>
+</block>

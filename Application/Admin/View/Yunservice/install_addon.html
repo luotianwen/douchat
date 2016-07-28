@@ -1,0 +1,133 @@
+<extend name="Public/base" />
+<block name="body">
+<style type="text/css">
+	.alert{
+		padding: 20px;
+	}
+</style>
+	<!-- 主体 -->
+	<div id="main" class="main" style="min-height: 760px;">
+
+		<div class="well">
+			<script>
+			var h = document.documentElement.clientHeight;
+			$(".gw-container").css('min-height',h);
+			</script>
+
+			<div class="clearfix">
+				<div class="alert alert-warning">
+					<p>正在下载插件文件, 请不要关闭窗口。</p>
+					<p>如果下载文件失败，可能造成的原因：<font color="red">写入失败</font>，请仔细检查写入权限是否正确。</p>
+				</div>
+				<div class="alert alert-info form-horizontal ng-scope" ng-controller="processor">
+					<dl class="dl-horizontal">
+						<dt style="font-size:18px;font-weight:700;color:#000;margin:10px 0px;">整体进度</dt>
+						<dd class="ng-binding"><span id="i"></span>/<span id="total"></span></dd>
+						<dt style="font-size:18px;font-weight:700;color:#000;margin:10px 0px;">正在下载文件</dt>
+						<dd class="ng-binding"><span id="path"></span></dd>
+					</dl>
+					<dl class="dl-horizontal download_failed">
+						<dt style="font-size:18px;font-weight:700;color:#000;margin:10px 0px;">文件状态（绿色表示下载成功，红色表示下载失败）</dt>
+					</dl>
+					<button id="retry" class="btn submit-btn ajax-post" type="submit" target-form="form-horizontal" style="display:none">重 试</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+	$(function() {
+		var bzname = "{$bzname}";
+		var shop_id = "{$shop_id}";
+		var branch_id = "{$branch_id}";
+		var files = "{$files}";
+		
+		var files = files.split(",");
+		var total = files.length;
+		$("#total").html(total);
+		$("#i").html(0);
+
+		install(files, bzname, shop_id, branch_id);
+	});
+
+	function install(uplist, bzname, shop_id, branch_id) {
+		var failLists = [];
+		var successLists = [];
+		$.each(uplist, function(index, path) {
+			$("#path").html(path);
+			$.ajax({
+				url : "{:U('do_install', '', '')}",
+				type : "post",
+				dataType : "json",
+				data : {
+					'file_path' : path,
+					'shop_id' : shop_id,
+					'bzname' : bzname,
+					'branch_id' : branch_id
+				},
+				success : function(data) {
+					console.log(data);
+					if (data.errcode == 1111) {
+						successLists.push(path);
+						$('.download_failed').append('<dd><font color="green">/Addons/'+bzname+path+'</font></dd>');
+					} else {
+						failLists.push(path);
+						$('.download_failed').append('<dd><font color="red">/Addons/'+bzname+path+'</font></dd>');
+					};
+
+					var complete = parseInt($("#i").html())+1;
+					$("#i").html(complete);
+					$("#path").html('<dd>/Addons/'+bzname+path+'</dd>');
+
+					if (complete == uplist.length) {
+				
+						if (failLists.length > 0) {
+							$(document).data('failLists',failLists);
+							$("#retry").css("display", "block");
+							
+						} else {
+							
+							$.ajax({
+								url : "{:U('Addons/install')}",
+								type : "post",
+								dataType : "json",
+								data : {
+									addon_name : bzname,
+									install_type : 1
+								},
+								success : function(data) {
+									console.log(data);
+									alert("安装成功");
+									window.location.href = "{:U('Addons/yun')}";
+								},
+								error : function() {
+									alert("安装失败");
+									window.location.href = "{:U('buyed')}";
+								}
+							});
+
+						}
+
+						return false;
+					}
+
+				},
+
+				error : function(data) {
+					alert('发生错误，安装中止');
+				}
+			});
+		});
+
+
+	}
+
+	$('#retry').click(function() {
+		$('.download_failed dd').remove();
+		var failLists = $(document).data('failLists');
+		$("#total").html(failLists.length);
+		$("#i").html(0);
+		install(failLists, "{$bzname}", "{$shop_id}", "{$branch_id}");
+		return false;
+	});
+	</script>
+</block>

@@ -1,0 +1,82 @@
+<extend name="Public/base" />
+<block name="style">
+	<link rel="stylesheet" type="text/css" href="__CSS__/shop.css" media="all">
+</block>
+<block name="body">
+	<div class="wrap">
+		<ul class="tab-nav nav">
+			<li class="current" data-type="addons">
+				<a href="javascript:void(0);">插件</a>
+			</li>
+			<li data-type="weisite_themes">
+				<a href="javascript:void(0);">微站模板</a>
+			</li>
+			<li data-type="admin_themes">
+				<a href="javascript:void(0);">后台模板</a>
+			</li>
+		</ul>
+
+		<section id="addons" class="tab-content">
+			<div class="table-bar">
+				<div class="main_apps">
+					<ul></ul>
+				</div>
+			</section>
+		</div>
+	</div>
+
+	<script type="text/javascript" src="__JS__/yunservice_api.js"></script>
+	<script>
+		function show_buyed_records(data) {
+			if (data.errcode != 1111) {
+				alert(data.errmsg);
+				window.location.href = "{:U('siteinfo')}";
+			}
+			$.each(data.data, function(i, item) {
+				var ul = $('.main_apps ul');
+				var li = '<li><div class="app_wrap">'+
+				'<div class="img">'+
+				'<a href="'+remote_url+'?/shop/'+item.shop_info.id+'" target="_blank"><img src="'+item.shop_info.cover+'"></a>'+
+				'</div>'+
+				'<div class="desc">'+
+				'<p class="name">'+item.shop_info.name+'</p>'+
+				'<p class="intro">'+item.shop_info.title+'</p>'+
+				'<a class="use_btn install" data-shop_id="'+item.shop_id+'" data-branch_id="'+item.branch_id+'">安装</a>'+
+				'<a class="use_btn detail" href="http://douchat.cc/?/shop/'+item.shop_info.id+'" target="_blank">详情</a>'+
+				'<i class="access"></i>'+
+				'</div>'+
+				'</div></li>';
+				ul.append(li);
+			});
+
+			$('a.install').on('click', function() {
+				var shop_id = $(this).attr('data-shop_id');
+				var branch_id = $(this).attr('data-branch_id');
+				var install_addon_url = "{:U('install_addon')}";
+				$.ajax({
+					url : install_addon_url,
+					type : 'post',
+					dataType : 'json',
+					data : {
+						shop_id : shop_id,
+						branch_id : branch_id
+					},
+					success : function(data) {
+						if (data.map) {
+							window.location.href = data.url;
+						} else {
+							alert('插件已安装');
+						}
+					},
+					error : function() {
+						console.log('error');
+					}
+				});
+			});
+		}
+
+		var params = {uid:"{$site_info.admin_uid}",site_url:"{$site_info.site_url}",site_token:"{$site_info.site_token}"};
+		get_api_data('buyed_records','show_buyed_records', params);
+
+		</script>
+	</block>

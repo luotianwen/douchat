@@ -1,0 +1,154 @@
+<extend name="Public/base" />
+<block name="body">
+<style type="text/css">
+	.alert{
+		padding: 20px;
+	}
+</style>
+	<!-- 主体 -->
+	<div class="wrap">
+			<ul class="tab-nav nav">
+				<li class="current" data-type="upgrade_online">
+					<a href="javascript:void(0);">在线升级
+					</a>
+				</li>
+				<li data-type="fversion">
+					<a href="javascript:void(0);">更新日志
+					</a>
+				</li>
+			</ul>
+			<div id="upgrade_online" class="tab-content">
+				<form action="" method="post" class="form-horizontal" role="form">
+					<div class="form-group">
+						<label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">系统当前版本</label>
+						<div class="col-sm-10">
+							<p class="form-control-static"><span class="fa fa-square-o"></span> &nbsp; <span style="color:red">V-{$version}</span></p>
+							<div class="help-block">在一个发布版中可能存在多次补丁, 因此版本可能未更新</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">系统最新版本</label>
+						<div class="col-sm-10">
+							<p class="form-control-static"><span class="fa fa-square-o"></span> &nbsp; <span style="color:red">V-{$version}</span>&nbsp;&nbsp;&nbsp;&nbsp;发布时间：{$add_time}</p>
+							<div class="help-block">系统会检测当前程序文件的变动, 如果被病毒或木马非法篡改, 会自动警报并提示恢复至默认版本, 因此可能修订日期未更新而文件有变动</div>
+						</div>
+					</div>
+					<?php if ($upgrade_file) { ?>
+					<div class="form-group">
+						<label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">文件同步情况</label>
+						<div class="col-sm-10">
+							<div class="help-block"><strong>注意: 重要: 本次更新涉及到程序变动, 请做好备份.</strong></div>
+							<div class="alert alert-info" style="line-height:20px;margin-top:20px;">
+								<foreach name="upgrade_file" item="vo" >
+									<div><span style="display:inline-block; width:30px;">{$vo.method}</span>{$vo.path}</div>
+								</foreach>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-xs-12 col-sm-2 col-md-2 col-lg-1 control-label">更新协议</label>
+						<div class="col-sm-10">
+							<div class="checkbox">
+								<label>
+									<input id="agreement_0" type="checkbox" value="0"> 我已经做好了相关文件的备份工作
+								</label>
+							</div>
+							<div class="checkbox">
+								<label>
+									<input id="agreement_1" type="checkbox" value="0"> 认同官方的更新行为并自愿承担更新所存在的风险
+								</label>
+							</div>
+							<div class="checkbox">
+								<label>
+									<input id="agreement_2" type="checkbox" value="0"> 理解官方的辛勤劳动并报以感恩的心态点击更新按钮
+								</label>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-offset-2 col-md-offset-2 col-lg-offset-1 col-xs-12 col-sm-10 col-md-10 col-lg-11">
+							<button id="upgrade" value="立即更新" class="btn btn-primary" type="button">立即更新
+							</button>
+						</div>
+					</div>
+					<?php } else { ?>
+					<div class="form-group">
+						<div class="col-sm-offset-2 col-md-offset-2 col-lg-offset-1 col-xs-12 col-sm-10 col-md-10 col-lg-11">
+							<button id="check_upgrade" value="检查更新" class="btn btn-primary" type="button">检查更新
+							</button>
+							<div class="help-block">当前系统未检测到有新版本, 你可以点击此按钮, 来立即检查一次.</div>
+						</div>
+					</div>
+					<?php } ?>
+				</form>
+			</div>
+			<div id="fversion" class="tab-content hidden">
+				<div class="data-table table-striped">
+					<table>
+						<thead>
+							<tr>
+								<th class="">名称</th>
+								<th class="">时间</th>
+							</tr>
+						</thead>
+						<tbody>
+						</tbody>
+					</table>
+				</div>
+			</div>
+	</div>
+	<script type="text/javascript" src="__JS__/yunservice_api.js"></script>
+	<script>
+	function show_upgrade(data) {
+		if (data.errcode != 1111) {
+			alert(data.errmsg);
+			window.location.href = "{:U('siteinfo')}";
+		}
+		$.each(data.data, function(i, item) {
+			var tr = $('<tr></tr>');
+			tr.append('<td><a target=_blank href="'+get_api_url()+'/?/fversion/'+item.id+'">'+item.title+'</a></td>');
+			tr.append('<td>'+item.add_time+'</td>');
+			$('table tbody').append(tr);
+		});
+	}
+
+	var params = {uid:"{$site_info.admin_uid}",site_url:"{$site_info.site_url}",site_token:"{$site_info.site_token}"};
+
+	get_api_data('fversion','show_upgrade', params);
+
+	$('.tab-nav').on('click', 'li', function() {
+		_this = $(this);
+		$('.tab-content').hide();
+		$('#'+_this.data('type')).removeClass('hidden');
+		$('#'+_this.data('type')).show();
+		_this.addClass('current');
+		_this.siblings().removeClass('current');
+	});
+
+	$("#upgrade").on('click', function() {
+		if ($("#agreement_0").val() == '1' && $("#agreement_1").val() == '1' && $("#agreement_2").val() == '1') {
+			if (confirm("这次的更新涉及到文件的覆盖，请先做好备份。是否确认要更新？")) {
+				window.location.href = "{:U('do_upgrade')}";
+			} 
+		} else {
+			alert("请先勾选更新协议");
+		}
+		
+		return false;
+		
+	});
+
+	$("#check_upgrade").on('click', function() {
+		alert("当前系统已为最新版！");
+		return false;
+	})
+
+	$("[id^=agreement]").click(function(){
+		if ($(this).val() == '0') {
+			$(this).val('1');
+		} else {
+			$(this).val('0');
+		}
+	});
+	</script>
+</block>

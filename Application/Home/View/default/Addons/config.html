@@ -1,0 +1,399 @@
+<extend name="Base/common" />
+
+<block name="body">
+<style text='text/css'>
+.image_material{
+    border: 1px dashed #ddd;
+    width: 80px;
+    height: 198px;
+    background: #eee;
+    text-align: center;
+    color: #333;
+    display: block;
+    float: left;
+    margin-left:10px;
+    position:relative;
+}
+.image_material a:hover{
+    background: #fff;
+}
+.image_material .select_image{
+	border: 1px dashed #ddd;
+	display: block;
+	width: 78px;
+	height: 160px;
+	line-height: 160px;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	background: #eee;
+}
+.image_material .delete{
+	border: 1px dashed #ddd;
+	display: block;
+	width: 78px;
+	height: 36px;
+	line-height: 36px;
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	background: #eee;
+}
+.upload-img-box .appmsg_item{
+	padding: 0px;
+	width: 306px;
+	height: 198px;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+}
+.uploadrow2{
+	border: 1px dashed #ddd;
+	width: 306px;
+	height: 198px;
+	background: #eee;
+	z-index: 888;
+}
+.uploadrow2 .upload-img-box .upload-pre-item2 img,
+.uploadrow2 .upload-img-box .upload-pre-item2{
+    width: 306px;
+	height: 198px;
+}
+.upload-img-box,
+.upload-img-box img{
+	width: 306px;
+	height: 198px;
+}
+</style>
+<div class="span9 page_message">
+	<section id="contents">
+      <include file="Addons/_nav" />
+      <div class="tab-content"> 
+	<form action="{:U('config')}" class="form-horizontal" method="post">
+		<empty name="custom_config">
+			<foreach name="data['config']" item="form" key="o_key">
+				<div class="form-item cf">
+                   <if condition="$form[type]!='hidden'">
+					<label class="item-label">
+						{$form.title|default=''}
+						<present name="form.tip">
+							<span class="check-tips">{$form.tip}</span>
+						</present>
+					</label>
+                    </if>
+						<switch name="form.type">
+							<case value="text">
+							<div class="controls">
+								<input type="text" name="config[{$o_key}]" class="text input-large" value="{$form.value}">
+							</div>
+							</case>
+							<case value="password">
+							<div class="controls">
+								<input type="password" name="config[{$o_key}]" class="text input-large" value="{$form.value}">
+							</div>
+							</case>
+							<case value="hidden">
+								<input type="hidden" name="config[{$o_key}]" value="{$form.value}">
+							</case>
+							<case value="radio">
+							<div class="controls">
+								<foreach name="form.options" item="opt" key="opt_k">
+									<label class="radio">
+										<input type="radio" name="config[{$o_key}]" value="{$opt_k}" <eq name="form.value" value="$opt_k"> checked</eq>>{$opt}
+									</label>
+								</foreach>
+							</div>
+							</case>
+							<case value="checkbox">
+							<div class="controls">
+								<foreach name="form.options" item="opt" key="opt_k">
+									<label class="checkbox">
+										<php>
+											is_null($form["value"]) && $form["value"] = array();
+										</php>
+										<input type="checkbox" name="config[{$o_key}][]" value="{$opt_k}" <in name="opt_k" value="$form.value"> checked</in>>{$opt}
+									</label>
+								</foreach>
+							</div>
+							</case>
+							<case value="select">
+							<div class="controls">
+								<select name="config[{$o_key}]">
+									<foreach name="form.options" item="opt" key="opt_k">
+										<option value="{$opt_k}" <eq name="form.value" value="$opt_k"> selected</eq>>{$opt}</option>
+									</foreach>
+								</select>
+							</div>
+							</case>
+							<case value="datetime">
+							<div class="controls">
+								<input type="datetime" name="config[{$o_key}]" class="text input-large time" value="{$form.value}" placeholder="请选择时间">
+							</div>
+							</case>	
+							<case value="textarea">
+							<div class="controls">
+								<label class="textarea input-large">
+									<textarea name="config[{$o_key}]">{$form.value}</textarea>
+								</label>
+							</div>
+							</case>
+                            <case value="picture">
+                               <div class="controls uploadrow2  pull-left" title="点击修改图片" rel="{$o_key}">
+                                  <input type="file" id="upload_picture_{$o_key}">
+                                  <input type="hidden" name="config[{$o_key}]" id="cover_id_{$o_key}" value="{$form['value']}"/>
+                                  <div class="upload-img-box cover_id_{$o_key}">
+                                    <notempty name="form['value']">
+                                      <img src="{$form['value']|get_cover_url}"/>
+                                      <em class="edit_img_icon">&nbsp;</em>
+                                    </notempty>
+                                  </div>
+
+                              </div>
+                              <div class='image_material' id='image_material'>
+                                  <a class="select_image" href="javascript:;"  onClick="$.WeiPHP.openImageMsg('{:U('/Home/Material/picture_config')}',selectImageCallback,'选择图片素材','{$o_key}')">选择素材库</a>
+                                  <a class="delete" onClick="delImage('{$o_key}')" href="javascript:;">清除图片</a>
+                              </div>
+                    		</case>
+                    		
+                    		 <case value="file">
+                          <div class="controls upload_file">
+                          	
+                                <input type="file" id="upload_file_{$o_key}">
+                                <input type="hidden" name="config[{$o_key}]" value="{$form['value']}"/>
+                                <div class="upload-img-box">
+                                  <present name="form.value">
+                                    <div class="upload-pre-file"><span class="upload_icon_all"></span>
+                                    {$form['value']|get_table_field=###,'id','name','File'}</div>
+                                  </present>
+                                </div>
+                             
+                          </div>
+                          <script type="text/javascript">
+								//上传图片
+							    /* 初始化上传插件 */
+								$("#upload_file_{$o_key}").uploadify({
+							        "height"          : 30,
+							        "swf"             : "__STATIC__/uploadify/uploadify.swf",
+							        "fileObjName"     : "download",
+							        "buttonText"      : "上传附件",
+							        "uploader"        : "{:U('File/upload',array('session_id'=>session_id()))}",
+							        "width"           : 120,
+							        'removeTimeout'	  : 1,
+							        "onUploadSuccess" : uploadFile{$o_key}
+							    });
+								function uploadFile{$o_key}(file, data){
+
+
+									var data = $.parseJSON(data);
+// 									console.log(data);
+							        if(data.status){
+							        	var name = "config[{$o_key}]";
+							        	$("input[name='"+name+"']").val(data.id);
+							        	$("input[name='"+name+"']").parent().find('.upload-img-box').html(
+							        		"<div class=\"upload-pre-file\"><span class=\"upload_icon_all\"></span>" + data.name + "</div>"
+							        	);
+							        } else {
+							        	updateAlert(data.info);
+							        	setTimeout(function(){
+							                $('#top-alert').find('button').click();
+							                $(this).removeClass('disabled').prop('disabled',false);
+							            },1500);
+							        }
+
+
+							    }
+								</script> 
+                        </case>
+                        
+                        <case value="user">
+
+                    <div class="controls">
+                    	<div id="userList" class="common_add_list fl">
+                            <notempty name="form.value">
+                                <div class="item" onClick="$.WeiPHP.selectSingleUser('{:U('Home/UserCenter/lists')}','config[{$o_key}]');">
+                                	<php>
+                                    	$userInfo = getUserInfo($form['value']);
+                                        
+                                    </php>
+                                    
+                                    <img src="{$userInfo['headimgurl']}"/><br/><span>{$userInfo['nickname']}</span>
+                                    <input type="hidden" name="config[{$o_key}]'" value="{$form.value}"/>
+                                    <span class="name">{$userInfo['nickname']}</span>
+                                </div>
+                            <else/>
+                            <a href="javascript:;" class="common_add_btn fl" onClick="$.WeiPHP.selectSingleUser('{:U('Home/UserCenter/lists')}','config[{$o_key}]');"></a>
+                            </notempty>
+                       </div>
+                    </div>
+                  </case>
+                  <case value="users">
+                        <div class="controls">
+                            <div id="userList" class="common_add_list fl">
+                            	
+                                <notempty name="form.value">
+
+                                	<php>
+                                            $userIds = $form['value'];
+                                            
+                                    </php>
+                                
+                                	<volist name="userIds" id="uid">
+                                    <php>
+                                            $userInfo = getUserInfo($uid);
+                  
+                                    </php>
+                                    <div class="item" onClick="$.WeiPHP.selectSingleUser('{:U('Home/UserCenter/lists')}','config[{$o_key}]');">
+                                    
+                                        <img src="{$userInfo['headimgurl']}"/><br/><span>{$userInfo['nickname']}</span>
+                                        <input type="hidden" name="config[{$o_key}]'[]" value="{$form.value}"/>
+                                        <em class="del" onclick="$(this).parent().remove();">X</em>
+                                        <span class="name">{$userInfo['nickname']}</span>
+                                    </div>
+                                    </volist>
+                                </notempty>
+                               <a href="javascript:;" class="common_add_btn fl" onClick="$.WeiPHP.selectMutiUser('{:U('Home/UserCenter/lists')}',9,'config[{$o_key}]');"></a>
+                           </div>
+                        </div>
+                      </case>
+                      <case value="admin">
+                        <div class="controls">
+                            <div id="userList" class="common_add_list fl">
+                                <notempty name="data[$field['name']]">
+                                    <div class="item" onClick="$.WeiPHP.selectSingleUser('{:U('Home/UserCenter/admin_lists')}','{$field.name}');">
+                                        <php>
+                                            $userInfo = getUserInfo($data[$field['name']]);
+                                            
+                                        </php>
+                                        <img src="{$userInfo['headimgurl']}"/><br/><span>{$userInfo['nickname']}</span>
+                                        <input type="hidden" name="{$field.name}'" value="{$data[$field['name']]}"/>
+                                        <span class="name">{$userInfo['nickname']}</span>
+                                    </div>
+                                <else/>
+                                <a href="javascript:;" class="common_add_btn fl" onClick="$.WeiPHP.selectSingleUser('{:U('Home/UserCenter/admin_lists')}','{$field.name}');"></a>
+                                </notempty>
+                           </div>
+                        </div>
+                      </case>   
+                    		                            
+							<case value="group">
+								<ul class="tab-nav nav">
+									<volist name="form.options" id="li">
+										<li data-tab="tab{$i}" <eq name="i" value="1">class="current"</eq>><a href="javascript:void(0);">{$li.title}</a></li>
+									</volist>
+							    </ul>
+							    <div class="tab-content">
+							    <volist name="form.options" id="tab">
+							    	<div id="tab{$i}" class="tab-pane <eq name="i" value="1">in</eq> tab{$i}">
+							    		<foreach name="tab['options']" item="tab_form" key="o_tab_key">
+							    		<label class="item-label">
+											{$tab_form.title|default=''}
+											<present name="tab_form.tip">
+												<span class="check-tips">{$tab_form.tip}</span>
+											</present>
+										</label>
+							    		<div class="controls">
+							    			<switch name="tab_form.type">
+												<case value="text">
+													<input type="text" name="config[{$o_tab_key}]" class="text input-large" value="{$tab_form.value}">
+												</case>
+												<case value="password">
+													<input type="password" name="config[{$o_tab_key}]" class="text input-large" value="{$tab_form.value}">
+												</case>
+												<case value="hidden">
+													<input type="hidden" name="config[{$o_tab_key}]" value="{$tab_form.value}">
+												</case>
+												<case value="radio">
+													<foreach name="tab_form.options" item="opt" key="opt_k">
+														<label class="radio">
+															<input type="radio" name="config[{$o_tab_key}]" value="{$opt_k}" <eq name="tab_form.value" value="$opt_k"> checked</eq>>{$opt}
+														</label>
+													</foreach>
+												</case>
+												<case value="checkbox">
+													<foreach name="tab_form.options" item="opt" key="opt_k">
+														<label class="checkbox">
+															<php> is_null($tab_form["value"]) && $tab_form["value"] = array();</php>
+            												<input type="checkbox" name="config[{$o_tab_key}][]" value="{$opt_k}" <in name="opt_k" value="$tab_form.value"> checked</in>>{$opt}
+        												</label>
+													</foreach>
+												</case>
+												<case value="select">
+													<select name="config[{$o_tab_key}]">
+														<foreach name="tab_form.options" item="opt" key="opt_k">
+															<option value="{$opt_k}" <eq name="tab_form.value" value="$opt_k"> selected</eq>>{$opt}</option>
+														</foreach>
+													</select>
+												</case>
+												<case value="textarea">
+													<label class="textarea input-large">
+														<textarea name="config[{$o_tab_key}]">{$tab_form.value}</textarea>
+													</label>
+												</case>
+												</switch>
+											</div>
+							    		</foreach>
+							    	</div>
+							    </volist>
+							    </div>
+							</case>
+						</switch>
+
+					</div>
+			</foreach>
+		<else />
+			<present name="custom_config">
+				{$custom_config}
+			</present>
+		</empty>
+			<input type="hidden" name="id" value="{$data.id}" readonly>
+			<button type="submit" class="btn submit-btn ajax-post" target-form="form-horizontal">确 定</button>
+		
+		</form>
+      </div>
+    </section>
+ </div>
+</block>
+
+<block name="script">
+<script type="text/javascript" charset="utf-8">
+	$(function(){
+        //初始化上传图片插件
+        initUploadImg({width:308,height:200,callback:function(file, data, name, is_mult,opts){
+        	if (data < 0) {
+        		updateAlert('图片传失败，请重新上传！','alert-error');
+        		return;
+        	};
+  	       //存入素材库
+	       $.post("{:U('Material/add_picture')}",{cover_id:data,src:name},function(data){
+		       if(data.status==1){
+		       	updateAlert('图片上传成功，已保存在图片素材库！' ,'alert-success');
+		       }else{
+		       	updateAlert('图片传成功，保存素材库失败！','alert-error');
+		       }		
+	       });
+
+
+        }});
+		   initUploadFile();
+		   //支持tab
+		   showTab();
+	})
+
+
+
+//选取图片素材后的返回处理
+function selectImageCallback(_this,inpuname){
+
+  $('.cover_id_'+inpuname).html($(_this).html()).show();
+  $('.image_material .delete').show();
+
+  $('input[name="config['+inpuname+']"]').val($(_this).data('cover_id'));
+  $.Dialog.close();
+}
+//清除图片
+function delImage(inputname){
+  $('.uploadrow2 .cover_id_'+inputname).html('').hide();
+  $('input[name="config['+inputname+']"]').val(0);
+}
+</script>
+</block>
